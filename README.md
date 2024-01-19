@@ -5,7 +5,7 @@ Bot with a couple of non-time dependant chat based games
 ## Set up for development
 1. Run in IDE - Make sure to replace the auth token with the token from [here](https://dashboard.ngrok.com/get-started/your-authtoken)
 ```
-.\ngrok.exe config add-authtoken <your auth token>
+.\ngrok.exe config add-authtoken 2b2Zg54KUomsbygH3rCW5l9qPGP_6yWJwyyQkU8oc3TGdEE29
 ```
 
 2. Then open the port for development
@@ -16,7 +16,7 @@ Bot with a couple of non-time dependant chat based games
 3. Edit the access token in `AccessToken` and replace it with your own token.
 
 4. Run the bot
-```
+```commandline
 python Main.py
 ```
 
