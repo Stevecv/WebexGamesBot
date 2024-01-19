@@ -13,4 +13,3 @@ if __name__ == "__main__":
     # Log into the bot itself
     print("Logging in...")
     Utils.login(ACCESS_TOKEN)
-
