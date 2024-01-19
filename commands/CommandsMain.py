@@ -1,6 +1,5 @@
-from commands import Test
+from commands import Test, Hangman
 from Utils import *
-
 
 @app.route('/messages_webhook', methods=['POST'])
 def messages_webhook():
@@ -24,8 +23,11 @@ def process_message(data):
 def registerCommands():
     print("Register commands")
     registerCommand("test", Test.test, "Simple test command")
+    registerCommand("hangman", Hangman.run_hangman, "Opens the hangman game")
 
 
-def registerCommand(commandName, commandFunc, commandDescription):
+def registerCommand(commandName, commandFunc, desc):
+    global commandsDescription
+
     commands[commandName] = commandFunc
-    commandDescription[commandName] = commandFunc
+    commandsDescription[commandName] = desc

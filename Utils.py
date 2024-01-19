@@ -85,6 +85,8 @@ def login(ACCESS_TOKEN):
 
 
 def parse_message(command, sender, roomId):
+    global commands
+
     if commands.get(command) is not None:
         cmd = commands.get(command)
         cmd(sender, roomId)
