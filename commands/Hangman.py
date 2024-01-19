@@ -92,23 +92,26 @@ def generate_card(roomId, art_stage, word, knownLetters):
     return {
         "contentType": "application/vnd.microsoft.card.adaptive",
         "content": {
-            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
             "type": "AdaptiveCard",
-            "version": "1.1",
+            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+            "version": "1.3",
             "body": [
                 {
                     "type": "TextBlock",
-                    #"text": "<pre>" + art + "</pre>\n\n" + ans
-
-                    "text": "**test**",
-                    #"text": "<pre>\n  ----------\\\n  0     \\\\  |\\\n  |      \\\\ |\\\n ---       |\\\n  |        |\\\n  /\\\\       |\\\n         -----\n\n_ _ _ _ _\n</pre>",
-                    "id": "hangmanart"
+                    "text": art.replace("  ", "&nbsp; "),
+                    "wrap": True,
+                    "fontType": "Monospace"
                 },
                 {
                     "type": "Input.Text",
-                    "id": "guess",
-                    "placeholder": "Guess: ",
-                    "maxLength": len(word)
+                    "placeholder": "Guess",
+                    "inlineAction": {
+                        "type": "Action.Submit",
+                        "id": "submitguess",
+                        "title": "Submit",
+                        "associatedInputs": "auto"
+                    },
+                    "id": "guess"
                 }
             ]
         }
@@ -190,7 +193,7 @@ def runGame():
 def run_hangman(sender, roomId):
     # runGame()
 
-    art_stage = 2
+    art_stage = 4
     word = "test"
     known_letters = ['t']
 
