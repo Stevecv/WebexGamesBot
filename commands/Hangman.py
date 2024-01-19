@@ -100,7 +100,7 @@ def generate_card(roomId, art_stage, word, knownLetters):
                     "type": "TextBlock",
                     #"text": "<pre>" + art + "</pre>\n\n" + ans
 
-                    "text": "**test**",
+                    "text": "`codeblock`",
                     #"text": "<pre>\n  ----------\\\n  0     \\\\  |\\\n  |      \\\\ |\\\n ---       |\\\n  |        |\\\n  /\\\\       |\\\n         -----\n\n_ _ _ _ _\n</pre>",
                     "id": "hangmanart"
                 },
