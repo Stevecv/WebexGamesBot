@@ -122,8 +122,10 @@ class HangmanGame:
                 "body": [
                     {
                         "type": "TextBlock",
-                        "text": "The word was: " + self.word,
+                        "text": "The word was: " + self.word + "\n\n" +
+                                self.hangmanArts[len(self.hangmanArts)-1].replace(" ", "&nbsp;"),
                         "wrap": True,
+                        "fontType": "Monospace"
                     },
                     {
                         "type": "ActionSet",
@@ -161,7 +163,7 @@ class HangmanGame:
                                     + str(self.guess_count) + " tries\nYou took: "
                                     + self.convert_time(time.time() - self.start_time),
 
-                            "wrap": True,
+                            "wrap": True
                         },
                         {
                             "type": "ActionSet",
@@ -187,8 +189,10 @@ class HangmanGame:
                     "body": [
                         {
                             "type": "TextBlock",
-                            "text": "Incorrect!\n\nThe word was: " + self.word,
+                            "text": "Incorrect!\n\nThe word was: " + self.word + "\n\n" +
+                                    self.hangmanArts[len(self.hangmanArts)-1].replace(" ", "&nbsp;"),
                             "wrap": True,
+                            "fontType": "Monospace"
                         },
                         {
                             "type": "ActionSet",

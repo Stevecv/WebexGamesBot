@@ -37,13 +37,25 @@ def process_card_response(data):
     inputs = attachment['inputs']
 
     personId = attachment['personId']
+    sender = teams_api.people.get(personId).userName
+    roomId = attachment['roomId']
+
     if len(inputs.keys()) == 0:
+        # If the person does not already have a game instance set up, create a new one
+        if personId not in hangmanGame.keys():
+            runningGame[personId] = True
+            hangmanGame[personId] = HangmanGame(sender, roomId, personId)
+            hangmanGame[personId].run_game()
+            return '200'
+
+        # If the player doesn't have a game running, create one
         if hangmanGame[personId] is None:
-            hangmanGame[personId] = HangmanGame(teams_api.people.get(personId).userName, attachment['roomId'], personId)
+            hangmanGame[personId] = HangmanGame(sender, roomId, personId)
             hangmanGame[personId].run_game()
             runningGame[personId] = True
             return '200'
         else:
+            # Otherwise, presume they've given up at their current game
             Utils.teams_api.messages.create(toPersonEmail=hangmanGame[personId].sender, text="Cards Unsupported", attachments=[
                 hangmanGame[personId].generate_given_up_card()])
             hangmanGame[personId].end_game()
