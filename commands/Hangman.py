@@ -1,203 +1,337 @@
+import time
+
 import Utils
 import random
+from wonderwords import RandomWord
 
 
-hangmanArts = ["" +
-               "\n" +
-               "\n" +
-               "\n" +
-               "\n" +
-               "\n" +
-               "\n         -----",
+class HangmanGame:
+    hangmanArts = ["" +
+                   "\n" +
+                   "\n" +
+                   "\n" +
+                   "\n" +
+                   "\n" +
+                   "\n         ─────",
 
-               "\n           |" +
-               "\n           |" +
-               "\n           |" +
-               "\n           |" +
-               "\n           |" +
-               "\n           | " +
-               "\n         -----",
+                   "\n           │" +
+                   "\n           │" +
+                   "\n           │" +
+                   "\n           │" +
+                   "\n           │" +
+                   "\n           │ " +
+                   "\n         ──┴──",
 
-               "            " +
-               "\n        \  |" +
-               "\n         \ |" +
-               "\n           |" +
-               "\n           |" +
-               "\n           | " +
-               "\n         -----",
+                   "            " +
+                   "\n        \\  │" +
+                   "\n         \\ │" +
+                   "\n           │" +
+                   "\n           │" +
+                   "\n           │ " +
+                   "\n         ──┴──",
 
-               "  ----------" +
-               "\n        \  |" +
-               "\n         \ |" +
-               "\n           |" +
-               "\n           |" +
-               "\n           | " +
-               "\n         -----",
+                   "  ─────────┐" +
+                   "\n        \\  │" +
+                   "\n         \\ │" +
+                   "\n           │" +
+                   "\n           │" +
+                   "\n           │ " +
+                   "\n         ──┴──",
 
-               "  ----------" +
-               "\n  0     \  |" +
-               "\n         \ |" +
-               "\n           |" +
-               "\n           |" +
-               "\n           | " +
-               "\n         -----",
+                   "  ┬────────┐" +
+                   "\n  0     \\  │" +
+                   "\n         \\ │" +
+                   "\n           │" +
+                   "\n           │" +
+                   "\n           │ " +
+                   "\n         ──┴──",
 
-               "  ----------" +
-               "\n  0     \  |" +
-               "\n  |      \ |" +
-               "\n  |        |" +
-               "\n  |        |" +
-               "\n           | " +
-               "\n         -----",
+                   "  ┬────────┐" +
+                   "\n  0     \\  │" +
+                   "\n  │      \\ │" +
+                   "\n  │        │" +
+                   "\n  │        │" +
+                   "\n           │ " +
+                   "\n         ──┴──",
 
-               "  ----------" +
-               "\n  0     \  |" +
-               "\n  |      \ |" +
-               "\n ---       |" +
-               "\n  |        |" +
-               "\n           | " +
-               "\n         -----",
+                   "  ┬────────┐" +
+                   "\n  0     \\  │" +
+                   "\n  │      \\ │" +
+                   "\n ─┼─       │" +
+                   "\n  │        │" +
+                   "\n           │ " +
+                   "\n         ──┴──",
 
-               "  ----------" +
-               "\n  0     \  |" +
-               "\n  |      \ |" +
-               "\n ---       |" +
-               "\n  |        |" +
-               "\n  \        | " +
-               "\n         -----",
+                   "  ┬────────┐" +
+                   "\n  0     \\  │" +
+                   "\n  │      \\ │" +
+                   "\n ─┼─       │" +
+                   "\n  │        │" +
+                   "\n  \        │ " +
+                   "\n         ──┴──",
 
-               "  ----------" +
-               "\n  0     \  |" +
-               "\n  |      \ |" +
-               "\n ---       |" +
-               "\n  |        |" +
-               "\n  /\       | " +
-               "\n         -----"]
+                   "  ┬────────┐" +
+                   "\n  0     \\  │" +
+                   "\n  │      \\ │" +
+                   "\n ─┼─       │" +
+                   "\n  │        │" +
+                   "\n  /\       │ " +
+                   "\n         ──┴──"]
 
-words = ["flowery", "repulsive", "wilderness", "male", "deep", "early", "system", "holistic", "lethal", "check", "truck", "accept", "brainy", "structure", "lettuce", "flag", "bells", "itch", "huge", "salt", "trick", "crow", "night", "amount", "grubby", "smart", "supply", "reply", "learned", "neat", "miniature", "picture", "bead", "describe", "meat", "man", "rot", "melted", "awesome", "ask", "ray", "toothbrush", "minute", "peel", "bury", "disagree", "wink", "wicked", "damp", "wind", "boorish", "chew", "lean", "alike", "crime", "damage", "brash", "drawer", "aunt", "giraffe", "toes", "bottle", "improve", "grateful", "dramatic", "shallow", "gullible", "accessible", "form", "disagree", "alarm", "cook", "tricky"]
+    def __init__(self, sender_id, room_id, person_id):
+        self.word = RandomWord().word()
+        self.known_letters = []
+        self.wrong_letters = []
+        self.sender = sender_id
+        self.room_id = room_id
+        self.games = 0
+        self.won = 0
+        self.personId = person_id
 
-games = 0
-won = 0
+        self.guess_count = 0
+        self.start_time = time.time()
 
+    """
+    Converts time from seconds into hours, minutes and seconds
+    Only shows necessary values
+    """
+    def convert_time(self, seconds):
+        seconds = seconds % (24 * 3600)
+        hour = seconds // 3600
+        seconds %= 3600
+        minutes = seconds // 60
+        seconds %= 60
 
-def generate_card(roomId, art_stage, word, knownLetters):
-    art = hangmanArts[art_stage]
-    ans = ""
-    for l in range(len(word)):
-        if word[l] in knownLetters:
-            ans = ans + word[l] + " "
+        if hour != 0:
+            return "%dh %02dm %02ds" % (hour, minutes, seconds)
+        elif minutes != 0:
+            return "%02dm %02ds" % (minutes, seconds)
         else:
-            ans = ans + "_ "
+            return "%02ds" % (seconds)
 
-    return {
-        "contentType": "application/vnd.microsoft.card.adaptive",
-        "content": {
-            "type": "AdaptiveCard",
-            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-            "version": "1.3",
-            "body": [
-                {
-                    "type": "TextBlock",
-                    "text": art.replace("  ", "&nbsp; "),
-                    "wrap": True,
-                    "fontType": "Monospace"
-                },
-                {
-                    "type": "Input.Text",
-                    "placeholder": "Guess",
-                    "inlineAction": {
-                        "type": "Action.Submit",
-                        "id": "submitguess",
-                        "title": "Submit",
-                        "associatedInputs": "auto"
+    """
+    Generates a card for when the person has given up
+    """
+    def generate_given_up_card(self):
+        return {
+            "contentType": "application/vnd.microsoft.card.adaptive",
+            "content": {
+                "type": "AdaptiveCard",
+                "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                "version": "1.3",
+                "body": [
+                    {
+                        "type": "TextBlock",
+                        "text": "The word was: " + self.word,
+                        "wrap": True,
                     },
-                    "id": "guess"
-                }
-            ]
+                    {
+                        "type": "ActionSet",
+                        "actions": [
+                            {
+                                "type": "Action.Submit",
+                                "title": "Play again",
+                                "style": "positive",
+                                "id": "playagain"
+                            }
+                        ]
+                    }
+                ]
+            }
         }
-    }
 
 
-def runGame():
-    global games
-    global won
+    """
+    Returns a card that shows some basic data about the game
+    Allows for correct/incorrect finishes
+    """
+    def generate_finished_card(self, correct):
+        if correct:
+            return {
+                "contentType": "application/vnd.microsoft.card.adaptive",
+                "content": {
+                    "type": "AdaptiveCard",
+                    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                    "version": "1.3",
+                    "body": [
+                        {
+                            "type": "TextBlock",
+                            "text": "Correct!\n\nThe word was: " + self.word
+                                    + "\nYou got it in: "
+                                    + str(self.guess_count) + " tries\nYou took: "
+                                    + self.convert_time(time.time() - self.start_time),
 
-    best = 100
+                            "wrap": True,
+                        },
+                        {
+                            "type": "ActionSet",
+                            "actions": [
+                                {
+                                    "type": "Action.Submit",
+                                    "title": "Play again",
+                                    "style": "positive",
+                                    "id": "playagain"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        else:
+            return {
+                "contentType": "application/vnd.microsoft.card.adaptive",
+                "content": {
+                    "type": "AdaptiveCard",
+                    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                    "version": "1.3",
+                    "body": [
+                        {
+                            "type": "TextBlock",
+                            "text": "Incorrect!\n\nThe word was: " + self.word,
+                            "wrap": True,
+                        },
+                        {
+                            "type": "ActionSet",
+                            "actions": [
+                                {
+                                    "type": "Action.Submit",
+                                    "title": "Play again",
+                                    "style": "positive",
+                                    "id": "playagain"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
 
-    for a in range(52):
-        print(" ")
-    word = random.choice(words)
-
-
-    knownLetters = []
-    wrongLetters = []
-
-    if games > 1:
-        if len(wrongLetters) < best:
-            print("This was your best game so far!")
-    else:
-        best = len(wrongLetters)
-
-
-    if games != 0:
-        print("You have won " + str(won) + " games out of " + str(games) + " " + str(round(won/games*100)) + "%")
-
-    while len(wrongLetters) < len(hangmanArts):
-
-        print(" ")
-        for letter in wrongLetters:
-            print(letter, end=', ')
-        print(" ")
-
-
-        characterGuess = input("Enter your guess > ")
-        characterGuess = characterGuess.lower()
-
-        if (len(characterGuess) > 1):
-            #Is a word
-            if (characterGuess == word):
-                print("\n\n\n\n\n")
-                print("Correct!")
-
-                won = won + 1
-                break
+    """
+    Generates the card that shows the player the hangman art
+    The amount of characters in the word
+    Correctly chosen letters
+    And incorrect letters
+    """
+    def generate_card(self):
+        if len(self.wrong_letters) > 0:
+            art = self.hangmanArts[len(self.wrong_letters) - 1]
+        else:
+            art = ""
+        ans = ""
+        for l in range(len(self.word)):
+            if self.word[l] in self.known_letters:
+                ans = ans + self.word[l] + " "
             else:
-                wrongLetters.append(characterGuess)
+                ans = ans + "_ "
+
+        finalArt = art + "\n\n" + ans + "\n\n" + ', '.join(self.wrong_letters)
+        return {
+            "contentType": "application/vnd.microsoft.card.adaptive",
+            "content": {
+                "type": "AdaptiveCard",
+                "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                "version": "1.3",
+                "body": [
+                    {
+                        "type": "TextBlock",
+                        "text": finalArt.replace(" ", "&nbsp;"),
+                        "wrap": True,
+                        "fontType": "Monospace"
+                    },
+                    {
+                        "type": "Input.Text",
+                        "placeholder": "Guess",
+                        "inlineAction": {
+                            "type": "Action.Submit",
+                            "id": "submitguess",
+                            "title": "Submit",
+                            "associatedInputs": "auto"
+                        },
+                        "id": "guess"
+                    },
+                    {
+                        "type": "ActionSet",
+                        "actions": [
+                            {
+                                "type": "Action.Submit",
+                                "title": "Give up",
+                                "id": "giveup",
+                                "style": "destructive",
+                                "associatedInputs": "none"
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+
+    """
+    Sends a card to the player containing all of the current game information
+    Also prompts user for input
+    """
+    def run_game(self):
+        if len(self.wrong_letters) < len(self.hangmanArts):
+            Utils.teams_api.messages.create(toPersonEmail=self.sender, text="Cards Unsupported", attachments=[
+                self.generate_card()])
 
         else:
-            #Character
-            if (characterGuess in word):
-                knownLetters.append(characterGuess)
+            Utils.teams_api.messages.create(toPersonEmail=self.sender, text="Cards Unsupported", attachments=[
+                self.generate_finished_card(False)])
+            self.end_game()
+
+    """
+    Makes a guess at a character or word in the game
+    """
+    def guess(self, character_guess):
+        self.guess_count += 1
+        character_guess = character_guess.lower()
+
+        if len(character_guess) > 1:
+            # If the word is correct, exit the game
+            if character_guess == self.word:
+                Utils.teams_api.messages.create(toPersonEmail=self.sender, text="Cards Unsupported", attachments=[
+                    self.generate_finished_card(True)])
+
+                self.end_game()
+                return
+            else:
+                # Add the character to the list of wrong characters
+                self.wrong_letters.append(character_guess)
+
+        else:
+            # If the character is correct
+            if character_guess in self.word:
+                # Characters
+                self.known_letters.append(character_guess)
 
             else:
-                wrongLetters.append(characterGuess)
-                print(characterGuess + " is not in the word or a character.")
+                # Words
+                self.wrong_letters.append(character_guess)
+                Utils.send_message_in_room(self.room_id, character_guess + " is not in the word")
 
+        # If the game shouldn't be over, prompt for the next guess
+        if self.isnt_ended():
+            self.run_game()
 
-        for j in range(52):
-            print(" ")
+    """
+    Checks if a game can be ended
+    And if it can, properly end and close it
+    """
 
+    def isnt_ended(self):
+        # If the player has used up all their guesses
+        if len(self.wrong_letters) > len(self.hangmanArts):
+            Utils.teams_api.messages.create(toPersonEmail=self.sender, text="Cards Unsupported", attachments=[
+                self.generate_finished_card(False)])
 
-        if(len(wrongLetters) > 0):
-            print(hangmanArts[len(wrongLetters)-1])
+            # Properly exit the game
+            self.end_game()
+            return False
 
+        return True
 
-    print("The word was " + word)
-
-
-    input("Press Enter to continue...")
-    games = games + 1
-    runGame()
-
-
-def run_hangman(sender, roomId):
-    # runGame()
-
-    art_stage = 4
-    word = "test"
-    known_letters = ['t']
-
-    Utils.teams_api.messages.create(toPersonEmail=sender, text="Cards Unsupported", attachments=[
-        generate_card(roomId, art_stage, word, known_letters)])
-
-    print("testcard")
+    """
+    Properly exits a game and deletes existing data
+    """
+    def end_game(self):
+        Utils.hangmanGame[self.personId] = None
+        Utils.runningGame[self.personId] = False
