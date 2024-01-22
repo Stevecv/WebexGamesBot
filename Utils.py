@@ -35,42 +35,36 @@ def process_card_response(data):
 
     attachment = (teams_api.attachment_actions.get(data.id)).json_data
     inputs = attachment['inputs']
-
-    personId = attachment['personId']
-    sender = teams_api.people.get(personId).userName
-    roomId = attachment['roomId']
+    room_id = attachment['roomId']
 
     if len(inputs.keys()) == 0:
         # If the person does not already have a game instance set up, create a new one
-        if personId not in hangmanGame.keys():
-            runningGame[personId] = True
-            hangmanGame[personId] = HangmanGame(sender, roomId, personId)
-            hangmanGame[personId].run_game()
-            return '200'
+        #if room_id not in hangmanGame.keys():
+        #    runningGame[room_id] = True
+        #    hangmanGame[room_id] = HangmanGame(sender, room_id, personId)
+        #    hangmanGame[room_id].run_game()
+        #    return '200'
 
         # If the player doesn't have a game running, create one
-        if hangmanGame[personId] is None:
-            hangmanGame[personId] = HangmanGame(sender, roomId, personId)
-            hangmanGame[personId].run_game()
-            runningGame[personId] = True
+
+        if hangmanGame[room_id] is None:
+            hangmanGame[room_id] = HangmanGame(room_id)
+            hangmanGame[room_id].run_game()
+            runningGame[room_id] = True
             return '200'
         else:
             # Otherwise, presume they've given up at their current game
-            Utils.teams_api.messages.create(toPersonEmail=hangmanGame[personId].sender, text="Cards Unsupported", attachments=[
-                hangmanGame[personId].generate_given_up_card()])
-            hangmanGame[personId].end_game()
+            Utils.teams_api.messages.create(roomId=room_id, text="Cards Unsupported", attachments=[
+                hangmanGame[room_id].generate_given_up_card()])
+            hangmanGame[room_id].end_game()
             return '200'
 
     if 'guess' in list(inputs.keys()):
-        if runningGame[personId]:
-            hangmanGame[personId].guess(inputs['guess'])
+        if runningGame[room_id]:
+            hangmanGame[room_id].guess(inputs['guess'])
             return '200'
 
     return '200'
-
-
-def send_direct_message(person_email, message):
-    teams_api.messages.create(toPersonEmail=person_email, text=message)
 
 
 def send_message_in_room(room_id, message):
@@ -112,19 +106,20 @@ def login(ACCESS_TOKEN):
     app.run(host='0.0.0.0', port=12000)
 
 
-def parse_message(command, sender, roomId, personId):
+def parse_message(command, room_id):
     global commands
     global hangmanGame
     global runningGame
 
     if command == "hangman":
-        runningGame[personId] = True
-        hangmanGame[personId] = HangmanGame(sender, roomId, personId)
-        hangmanGame[personId].run_game()
+        print("new hangman game")
+        runningGame[room_id] = True
+        hangmanGame[room_id] = HangmanGame(room_id)
+        hangmanGame[room_id].run_game()
         return
 
     if commands.get(command) is not None:
         cmd = commands.get(command)
-        cmd(sender, roomId)
+        cmd(room_id)
 
     return

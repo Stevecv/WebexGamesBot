@@ -3,6 +3,7 @@ import time
 import Utils
 import random
 from wonderwords import RandomWord
+import csv
 
 
 class HangmanGame:
@@ -78,15 +79,13 @@ class HangmanGame:
                    "\n / \       │ " +
                    "\n         ──┴──"]
 
-    def __init__(self, sender_id, room_id, person_id):
+    def __init__(self, room_id):
         self.word = RandomWord().word()
         self.known_letters = []
         self.wrong_letters = []
-        self.sender = sender_id
         self.room_id = room_id
         self.games = 0
         self.won = 0
-        self.personId = person_id
 
         self.guess_count = 0
         self.start_time = time.time()
@@ -274,11 +273,11 @@ class HangmanGame:
     """
     def run_game(self):
         if len(self.wrong_letters) < len(self.hangmanArts):
-            Utils.teams_api.messages.create(toPersonEmail=self.sender, text="Cards Unsupported", attachments=[
+            Utils.teams_api.messages.create(roomId=self.room_id, text="Cards Unsupported", attachments=[
                 self.generate_card()])
 
         else:
-            Utils.teams_api.messages.create(toPersonEmail=self.sender, text="Cards Unsupported", attachments=[
+            Utils.teams_api.messages.create(roomId=self.room_id, text="Cards Unsupported", attachments=[
                 self.generate_finished_card(False)])
             self.end_game()
 
@@ -292,7 +291,7 @@ class HangmanGame:
         if len(character_guess) > 1:
             # If the word is correct, exit the game
             if character_guess == self.word:
-                Utils.teams_api.messages.create(toPersonEmail=self.sender, text="Cards Unsupported", attachments=[
+                Utils.teams_api.messages.create(roomId=self.room_id, text="Cards Unsupported", attachments=[
                     self.generate_finished_card(True)])
 
                 self.end_game()
@@ -324,7 +323,7 @@ class HangmanGame:
     def isnt_ended(self):
         # If the player has used up all their guesses
         if len(self.wrong_letters) > len(self.hangmanArts):
-            Utils.teams_api.messages.create(toPersonEmail=self.sender, text="Cards Unsupported", attachments=[
+            Utils.teams_api.messages.create(roomId=self.room_id, text="Cards Unsupported", attachments=[
                 self.generate_finished_card(False)])
 
             # Properly exit the game
@@ -334,8 +333,21 @@ class HangmanGame:
         return True
 
     """
+    Saves the game data to the database
+    """
+    def save_data(self):
+        db = open('games.csv')
+        type(db)
+
+        csv_reader = csv.reader(db)
+
+
+
+    """
     Properly exits a game and deletes existing data
     """
     def end_game(self):
-        Utils.hangmanGame[self.personId] = None
-        Utils.runningGame[self.personId] = False
+        print(Utils.hangmanGame)
+        print("end game - " + self.room_id)
+        Utils.hangmanGame[self.room_id] = None
+        Utils.runningGame[self.room_id] = False
