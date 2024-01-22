@@ -73,13 +73,10 @@ class Leaderboard:
                     lvl += 1
 
             df = pd.DataFrame({'Name': names,
-                               'Word':  words,
-                               'Time' : time,
-                               'Tries': tries})
+                               'Time' : time})
 
-            leaderboard = df.sort_values(by=['Time']).to_string(index=False)
-            Utils.send_message_in_room(self.room_id, leaderboard.replace(" ", "&nbsp;"))
-
+            df.sort_values(by=['Time'], ascending=False)
+            leaderboard = df.to_string(index=False)
             Utils.teams_api.messages.create(roomId=self.room_id, text="Cards Unsupported", attachments=[
                 self.generate_leaderboard_card(leaderboard)])
 
