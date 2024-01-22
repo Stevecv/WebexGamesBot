@@ -1,4 +1,4 @@
-from commands import Hangman
+from commands import Hangman, Leaderboard
 from Utils import *
 
 
@@ -30,6 +30,7 @@ Registers all commands
 def registerCommands():
     print("Register commands")
     registerCommand("hangman", Hangman.HangmanGame.run_game, "Opens the hangman game")
+    registerCommand("leaderboard-time", Leaderboard.show_leaderboard, "Opens the leaderboard")
 
 
 """

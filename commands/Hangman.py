@@ -3,7 +3,7 @@ import time
 import Utils
 import random
 from wonderwords import RandomWord
-import csv
+from csv import writer
 
 
 class HangmanGame:
@@ -79,13 +79,15 @@ class HangmanGame:
                    "\n / \       │ " +
                    "\n         ──┴──"]
 
-    def __init__(self, room_id):
+    def __init__(self, sender_id, room_id, person_id):
         self.word = RandomWord().word()
         self.known_letters = []
         self.wrong_letters = []
+        self.sender = sender_id
         self.room_id = room_id
         self.games = 0
         self.won = 0
+        self.personId = person_id
 
         self.guess_count = 0
         self.start_time = time.time()
@@ -279,7 +281,7 @@ class HangmanGame:
         else:
             Utils.teams_api.messages.create(roomId=self.room_id, text="Cards Unsupported", attachments=[
                 self.generate_finished_card(False)])
-            self.end_game()
+            self.end_game(False)
 
     """
     Makes a guess at a character or word in the game
@@ -294,7 +296,7 @@ class HangmanGame:
                 Utils.teams_api.messages.create(roomId=self.room_id, text="Cards Unsupported", attachments=[
                     self.generate_finished_card(True)])
 
-                self.end_game()
+                self.end_game(True)
                 return
             else:
                 # Add the character to the list of wrong characters
@@ -327,7 +329,7 @@ class HangmanGame:
                 self.generate_finished_card(False)])
 
             # Properly exit the game
-            self.end_game()
+            self.end_game(False)
             return False
 
         return True
@@ -335,19 +337,29 @@ class HangmanGame:
     """
     Saves the game data to the database
     """
-    def save_data(self):
-        db = open('games.csv')
-        type(db)
+    def save_data(self, save):
+        print(save)
+        print(Utils.teams_api.rooms.get(roomId=self.room_id).title)
+        print(Utils.teams_api.people.get(personId=self.personId).displayName)
 
-        csv_reader = csv.reader(db)
+        if save:
+            data = [Utils.teams_api.rooms.get(roomId=self.room_id).title,
+                    self.word,
+                    time.time() - self.start_time,
+                    self.guess_count]
 
+            with open('games.csv', 'a') as f_object:
+                writer_object = writer(f_object)
+                writer_object.writerow(data)
+
+                f_object.close()
 
 
     """
     Properly exits a game and deletes existing data
     """
-    def end_game(self):
-        print(Utils.hangmanGame)
-        print("end game - " + self.room_id)
+    def end_game(self, save):
+        self.save_data(save)
+
         Utils.hangmanGame[self.room_id] = None
         Utils.runningGame[self.room_id] = False
