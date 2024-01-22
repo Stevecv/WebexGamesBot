@@ -23,61 +23,45 @@ class Leaderboard:
                         "text": leaderboard.replace(" ", "&nbsp;"),
                         "wrap": True,
                         "fontType": "Monospace"
-                    },
-                    {
-                        "type": "Input.Text",
-                        "placeholder": "Guess",
-                        "inlineAction": {
-                            "type": "Action.Submit",
-                            "id": "submitguess",
-                            "title": "Submit",
-                            "associatedInputs": "auto"
-                        },
-                        "id": "guess"
-                    },
-                    {
-                        "type": "ActionSet",
-                        "actions": [
-                            {
-                                "type": "Action.Submit",
-                                "title": "Give up",
-                                "id": "giveup",
-                                "style": "destructive",
-                                "associatedInputs": "none"
-                            }
-                        ]
                     }
                 ]
             }
         }
 
-
     def show_leaderboard(self, type):
+        names = []
+        words = []
+        time = []
+        tries = []
+
+        lvl = 0
+        with open('games.csv') as file_obj:
+            reader_obj = csv.reader(file_obj)
+            for row in reader_obj:
+                if len(row) > 0 and lvl > 0:
+                    names.append(row[0])
+                    words.append(row[1])
+                    time.append(round(float(row[2]), 1))
+                    tries.append(int(row[3]))
+
+                lvl += 1
+
         if type == "quickestTime":
-            names = []
-            words = []
-            time = []
-            tries = []
-
-            lvl = 0
-            with open('games.csv') as file_obj:
-                reader_obj = csv.reader(file_obj)
-                for row in reader_obj:
-                    print(row)
-                    if len(row) > 0 and lvl > 0:
-                        names.append(row[0])
-                        words.append(row[1])
-                        time.append(row[2])
-                        tries.append(row[3])
-
-                    lvl += 1
-
             df = pd.DataFrame({'Name': names,
-                               'Time' : time})
+                               'Word': words,
+                               'Time': time})
 
-            df.sort_values(by=['Time'], ascending=False)
-            leaderboard = df.to_string(index=False)
+            df.sort_values(by='Time', ascending=True, inplace=True)
+            top_ten = df.head(10)
             Utils.teams_api.messages.create(roomId=self.room_id, text="Cards Unsupported", attachments=[
-                self.generate_leaderboard_card(leaderboard)])
+                self.generate_leaderboard_card(top_ten.to_string(index=False))])
 
-            print(df)
+        elif type == "lessTries":
+            df = pd.DataFrame({'Name': names,
+                               'Word': words,
+                               'Tries': tries})
+
+            df.sort_values(by='Tries', ascending=True, inplace=True)
+            top_ten = df.head(10)
+            Utils.teams_api.messages.create(roomId=self.room_id, text="Cards Unsupported", attachments=[
+                self.generate_leaderboard_card(top_ten.to_string(index=False))])

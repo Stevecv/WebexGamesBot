@@ -128,6 +128,10 @@ def parse_message(command, sender, room_id, personId):
         Leaderboard(room_id).show_leaderboard("quickestTime")
         return
 
+    if command == "leaderboard-tries":
+        Leaderboard(room_id).show_leaderboard("lessTries")
+        return
+
     if commands.get(command) is not None:
         cmd = commands.get(command)
         cmd(sender, room_id)
