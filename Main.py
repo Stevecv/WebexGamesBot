@@ -4,7 +4,6 @@ from commands import CommandsMain
 
 # Everything to do on bot loading
 if __name__ == "__main__":
-    print("S T A R T I N G")
     print("Starting GamesBot...")
 
     # Register all the commands

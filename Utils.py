@@ -112,7 +112,6 @@ def parse_message(command, room_id):
     global runningGame
 
     if command == "hangman":
-        print("new hangman game")
         runningGame[room_id] = True
         hangmanGame[room_id] = HangmanGame(room_id)
         hangmanGame[room_id].run_game()
