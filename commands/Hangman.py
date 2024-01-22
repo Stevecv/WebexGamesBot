@@ -67,7 +67,7 @@ class HangmanGame:
                    "\n  │      \\ │" +
                    "\n ─┼─       │" +
                    "\n  │        │" +
-                   "\n  \        │ " +
+                   "\n   \       │ " +
                    "\n         ──┴──",
 
                    "  ┬────────┐" +
@@ -75,7 +75,7 @@ class HangmanGame:
                    "\n  │      \\ │" +
                    "\n ─┼─       │" +
                    "\n  │        │" +
-                   "\n  /\       │ " +
+                   "\n / \       │ " +
                    "\n         ──┴──"]
 
     def __init__(self, sender_id, room_id, person_id):
