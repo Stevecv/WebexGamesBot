@@ -1,3 +1,4 @@
+import Utils
 from Utils import *
 from commands import Hangman
 
@@ -43,7 +44,7 @@ def process_message(data):
         command = ' '.join(commands_split)
         if len(command) == 0:
             Utils.send_message_in_room(data.roomId, "@Hangman hangman - Starts a new hangman game\n"
-                                                    "@Hangman hangman-custom - Starts a game with a custom word"
+                                                    "@Hangman hangman-custom - Starts a game with a custom word\n"
                                                     "@Hangman leaderboard-time - Opens the leaderboard for quickest time\n"
                                                     "@Hangman leaderboard-tries - Opens the leaderboard for the least amount of tries")
 
