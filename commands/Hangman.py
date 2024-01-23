@@ -1,7 +1,6 @@
 import time
 
 import Utils
-import random
 from wonderwords import RandomWord
 from csv import writer
 
@@ -79,8 +78,12 @@ class HangmanGame:
                    "\n / \       │ " +
                    "\n         ──┴──"]
 
-    def __init__(self, sender_id, room_id, person_id):
-        self.word = RandomWord().word()
+    def __init__(self, sender_id, room_id, person_id, word):
+        self.allow_leaderboard = (word is None)
+        if word is None:
+            self.word = RandomWord().word()
+        else:
+            self.word = word
         self.known_letters = []
         self.wrong_letters = []
         self.sender = sender_id
@@ -96,6 +99,7 @@ class HangmanGame:
     Converts time from seconds into hours, minutes and seconds
     Only shows necessary values
     """
+
     def convert_time(self, seconds):
         seconds = seconds % (24 * 3600)
         hour = seconds // 3600
@@ -113,6 +117,7 @@ class HangmanGame:
     """
     Generates a card for when the person has given up
     """
+
     def generate_given_up_card(self):
         return {
             "contentType": "application/vnd.microsoft.card.adaptive",
@@ -124,7 +129,7 @@ class HangmanGame:
                     {
                         "type": "TextBlock",
                         "text": "The word was: " + self.word + "\n\n" +
-                                self.hangmanArts[len(self.hangmanArts)-1].replace(" ", "&nbsp;"),
+                                self.hangmanArts[len(self.hangmanArts) - 1].replace(" ", "&nbsp;"),
                         "wrap": True,
                         "fontType": "Monospace"
                     },
@@ -143,11 +148,11 @@ class HangmanGame:
             }
         }
 
-
     """
     Returns a card that shows some basic data about the game
     Allows for correct/incorrect finishes
     """
+
     def generate_finished_card(self, correct):
         if correct:
             return {
@@ -191,7 +196,7 @@ class HangmanGame:
                         {
                             "type": "TextBlock",
                             "text": "Incorrect!\n\nThe word was: " + self.word + "\n\n" +
-                                    self.hangmanArts[len(self.hangmanArts)-1].replace(" ", "&nbsp;"),
+                                    self.hangmanArts[len(self.hangmanArts) - 1].replace(" ", "&nbsp;"),
                             "wrap": True,
                             "fontType": "Monospace"
                         },
@@ -216,6 +221,7 @@ class HangmanGame:
     Correctly chosen letters
     And incorrect letters
     """
+
     def generate_card(self):
         if len(self.wrong_letters) > 0:
             art = self.hangmanArts[len(self.wrong_letters) - 1]
@@ -273,6 +279,7 @@ class HangmanGame:
     Sends a card to the player containing all of the current game information
     Also prompts user for input
     """
+
     def run_game(self):
         if len(self.wrong_letters) < len(self.hangmanArts):
             Utils.teams_api.messages.create(roomId=self.room_id, text="Cards Unsupported", attachments=[
@@ -286,6 +293,7 @@ class HangmanGame:
     """
     Makes a guess at a character or word in the game
     """
+
     def guess(self, character_guess):
         self.guess_count += 1
         character_guess = character_guess.lower()
@@ -337,6 +345,7 @@ class HangmanGame:
     """
     Saves the game data to the database
     """
+
     def save_data(self, save):
         print(save)
         print(Utils.teams_api.rooms.get(roomId=self.room_id).title)
@@ -354,12 +363,13 @@ class HangmanGame:
 
                 f_object.close()
 
-
     """
     Properly exits a game and deletes existing data
     """
+
     def end_game(self, save):
-        self.save_data(save)
+        if self.allow_leaderboard:
+            self.save_data(save)
 
         Utils.hangmanGame[self.room_id] = None
         Utils.runningGame[self.room_id] = False

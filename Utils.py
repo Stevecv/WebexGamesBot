@@ -1,11 +1,10 @@
 import requests
 
 import json
+from Utils import *
 from flask import Flask, request
 from webexteamssdk import WebexTeamsAPI, Webhook
 
-import Utils
-from commands import Hangman
 from commands.Hangman import HangmanGame
 from commands.Leaderboard import Leaderboard
 
@@ -22,6 +21,7 @@ app = Flask(__name__)
 
 hangmanGame = {}
 runningGame = {}
+
 
 @app.route('/attachmentActions_webhook', methods=['POST'])
 def attachmentActions_webhook():
@@ -45,19 +45,19 @@ def process_card_response(data):
         # If the person does not already have a game instance set up, create a new one
         if room_id not in hangmanGame.keys():
             runningGame[room_id] = True
-            hangmanGame[room_id] = HangmanGame(sender, room_id, personId)
+            hangmanGame[room_id] = HangmanGame(sender, room_id, personId, None)
             hangmanGame[room_id].run_game()
             return '200'
 
         # If the player doesn't have a game running, create one
         if hangmanGame[room_id] is None:
-            hangmanGame[room_id] = HangmanGame(sender, room_id, personId)
+            hangmanGame[room_id] = HangmanGame(sender, room_id, personId, None)
             hangmanGame[room_id].run_game()
             runningGame[room_id] = True
             return '200'
         else:
             # Otherwise, presume they've given up at their current game
-            Utils.teams_api.messages.create(roomId=room_id, text="Cards Unsupported", attachments=[
+            teams_api.messages.create(roomId=room_id, text="Cards Unsupported", attachments=[
                 hangmanGame[room_id].generate_given_up_card()])
             hangmanGame[room_id].end_game(False)
             return '200'
@@ -66,6 +66,12 @@ def process_card_response(data):
         if runningGame[room_id]:
             hangmanGame[room_id].guess(inputs['guess'])
             return '200'
+
+    if 'submitcustomword' in list(inputs.keys()):
+        hangmanGame[room_id] = HangmanGame(sender, room_id, personId, inputs['submitcustomword'])
+        hangmanGame[room_id].run_game()
+        runningGame[room_id] = True
+        return '200'
 
     return '200'
 
@@ -113,14 +119,48 @@ def login(ACCESS_TOKEN):
     app.run(host='0.0.0.0', port=12000)
 
 
+def generate_custom_game():
+    return {
+        "contentType": "application/vnd.microsoft.card.adaptive",
+        "content": {
+            "type": "AdaptiveCard",
+            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+            "version": "1.3",
+            "body": [
+                {
+                    "type": "TextBlock",
+                    "text": "Enter a word to create a game with a specific word",
+                    "wrap": True
+                },
+                {
+                    "type": "Input.Text",
+                    "placeholder": "Word",
+                    "inlineAction": {
+                        "type": "Action.Submit",
+                        "id": "submit_custom_word",
+                        "title": "Submit",
+                        "associatedInputs": "auto"
+                    },
+                    "id": "submitcustomword"
+                }
+            ]
+        }
+    }
+
+
 def parse_message(command, sender, room_id, personId):
     global commands
     global hangmanGame
     global runningGame
 
+    if command == "hangman-custom":
+        teams_api.messages.create(roomId=room_id, text="Cards Unsupported", attachments=[
+            generate_custom_game()])
+        return
+
     if command == "hangman":
         runningGame[room_id] = True
-        hangmanGame[room_id] = HangmanGame(sender, room_id, personId)
+        hangmanGame[room_id] = HangmanGame(sender, room_id, personId, None)
         hangmanGame[room_id].run_game()
         return
 

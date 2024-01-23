@@ -10,6 +10,7 @@ class Leaderboard:
     def __init__(self, room_id):
         self.room_id = room_id
 
+
     def generate_leaderboard_card(self, leaderboard):
         return {
             "contentType": "application/vnd.microsoft.card.adaptive",
